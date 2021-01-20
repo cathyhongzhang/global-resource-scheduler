@@ -463,9 +463,6 @@ function kube::common::start_controller_manager {
 function kube::common::start_kubescheduler {
     CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
     kubeconfigfilepaths="${CERT_DIR}/scheduler.kubeconfig"
-    if [[ $# -gt 1 ]] ; then
-       kubeconfigfilepaths=$@
-    fi
 
     port_arg=$((${INSECURE_SCHEDULER_PORT}))
     secure_port_arg=$((${KUBE_SCHEDULER_PORT}))
@@ -477,11 +474,19 @@ function kube::common::start_kubescheduler {
       --scheduler-tag="$1" \
       --secure-port="$(($secure_port_arg + $1))" \
       --leader-elect=false \
+      --scheduler-name="$2" \
       --kubeconfig "${kubeconfigfilepaths}" \
       --feature-gates="${FEATURE_GATES}" \
       --master="https://${API_HOST}:${API_SECURE_PORT}" >"${SCHEDULER_LOG}" 2>&1 &
     SCHEDULER_PID=$!
 }
+
+function kube::common::start_gs_scheduler {
+    GS_SCHEDULER_LOG=${LOG_DIR}/gs-scheduler.log
+    ${CONTROLPLANE_SUDO} "${GO_OUT}/gs-scheduler" --schedulername="scheduler1"  > "${GS_SCHEDULER_LOG}" 2>&1 &
+    GS_SCHEDULER_PID=$!
+}
+
 
 function kube::common::start_kubelet {
     KUBELET_LOG=${LOG_DIR}/kubelet.log
@@ -645,13 +650,22 @@ function kube::common::generate_kubeproxy_certs {
     fi
 }
 
-function kube::common::start_global_resource_scheduler {
+function kube::common::start_gs_controllers {
     CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
     kubeconfigfilepaths="${CERT_DIR}/admin.kubeconfig"
     
-    GSR_LOG=${LOG_DIR}/global-resource-scheduler.log
-    ${CONTROLPLANE_SUDO} ${GO_OUT}/globalscheduler -kubeconfig "${kubeconfigfilepaths}"  >"${GSR_LOG}" 2>&1 &
+    GRS_LOG=${LOG_DIR}/global-resource-scheduler.log
+    ${CONTROLPLANE_SUDO} ${GO_OUT}/gs-controllers -kubeconfig "${kubeconfigfilepaths}"  >"${GRS_LOG}" 2>&1 &
       # TODO need to add log level in the future for debugging
       #--v="${LOG_LEVEL}" \
-    GSR_PID=$!
+    GRS_PID=$!
 }
+
+
+function kube::common::start_grpc_server {
+    CONTROLPLANE_SUDO=$(test -w "${CERT_DIR}" || echo "sudo -E")
+    # Based on the https://github.com/futurewei-cloud/global-resource-scheduler/blob/master/docs/design-proposals/global-scheduler/Globalscheduler-Controllers-Start.md
+    ${CONTROLPLANE_SUDO} ${GO_OUT}/grpc-server &
+    GRPC_SERVER_PID=$!
+}
+

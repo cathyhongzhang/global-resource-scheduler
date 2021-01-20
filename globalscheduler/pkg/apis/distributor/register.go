@@ -14,9 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cluster
+package distributor
 
 const (
 	GroupName = "globalscheduler.com"
 	Version   = "v1"
+	Kind      = "Distributor"
+	Plural    = "distributors"
+	Singluar  = "distributor"
+	ShortName = "dist"
+	Name      = Plural + "." + GroupName
 )

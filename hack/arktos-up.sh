@@ -104,7 +104,7 @@ do
 done
 
 if [ "x${GO_OUT}" == "x" ]; then
-    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kube-controller-manager cmd/kubelet cmd/kube-proxy"
+    make -C "${KUBE_ROOT}" WHAT="cmd/kubectl cmd/hyperkube cmd/kube-apiserver cmd/kube-controller-manager cmd/kubelet cmd/kube-proxy cmd/kube-scheduler"
 else
     echo "skipped the build."
 fi
@@ -446,7 +446,8 @@ if [[ "${START_MODE}" != "kubeletonly" ]]; then
 
   #cluster/kubectl.sh create -f hack/runtime/workload-controller-manager-clusterrolebinding.yaml
 
-  ${KUBECTL} --kubeconfig="${CERT_DIR}/admin.kubeconfig" apply -f "${KUBE_ROOT}/test/yaml/globalscheduler/scheduler.yaml"
+  # ${KUBECTL} --kubeconfig="${CERT_DIR}/admin.kubeconfig" apply -f "${KUBE_ROOT}/globalscheduler/test/yaml/scheduler.yaml"
+  # ${KUBECTL} --kubeconfig="${CERT_DIR}/admin.kubeconfig" apply -f "${KUBE_ROOT}/globalscheduler/test/yaml/cluster.yaml"
   kube::common::start_controller_manager
   if [[ "${START_MODE}" != "nokubeproxy" ]]; then
     kube::common::start_kubeproxy
