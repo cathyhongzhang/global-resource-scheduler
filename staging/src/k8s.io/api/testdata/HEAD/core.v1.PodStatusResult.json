@@ -198,6 +198,9 @@
     "assignedScheduler": {
       "name": "67",
       "tag": "68"
-    }
+    },
+    "clusterInstanceId": "69",
+    "distributorName": "70",
+    "dispatcherName": "71"
   }
 }

@@ -3572,6 +3572,15 @@ message PodStatus {
   // Assigned Scheduler
   // +optional
   optional ResourceScheduler assignedScheduler = 14;
+
+  // +optional
+  optional string clusterInstanceId = 15;
+
+  // +optional
+  optional string distributorName = 16;
+
+  // +optional
+  optional string dispatcherName = 17;
 }
 
 // PodStatusResult is a wrapper for PodStatus returned by kubelet that can be encode/decoded
