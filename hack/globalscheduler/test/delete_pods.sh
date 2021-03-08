@@ -17,7 +17,7 @@ locs=("NewYork NewYork NE-1 US" "Bellevue Washington NW-1 US" "Orlando Florida S
 
 function create_pod {
 # Create multiple YAML objects from stdin
-cat <<EOF | cluster/kubectl.sh apply -f -
+cat <<EOF | cluster/kubectl.sh delete -f -
 apiVersion: v1
 kind: Pod
 metadata:
@@ -51,29 +51,9 @@ EOF
 
 locsLen=${#locs[@]}
 
-starts=$(date +%s%N)
-sleepseconds=$2
-sleepms=$(echo "$sleepseconds*1000000000/1" | bc)
-
 for ((i = 0 ; i < $(($1)) ; i++)); do
     locsIdx=$(($i%locsLen))
     name="pod-$(($i))"
-    create_pod $name ${locs[$locsIdx]} &
-    #sleep take more time than expected.
-    tw=$((${tw} + ${sleepms}))
-    #Pods are created in 10 units to save time
-    if [ $(($i%10)) -eq 9 ] 
-    then 
-         while [ $(($(date +%s%N) - ${starts})) -lt ${tw} ]
-         do
-              sleep 0.0001
-         done
-    fi
+    create_pod $name ${locs[$locsIdx]}
+    sleep $2
 done
-#Wait the time left
-while [ $(($(date +%s%N) - ${starts})) -lt ${tw} ]
-do
-    sleep 0.0001
-done
-
-echo "The shell script took $(echo "scale=3;($(date +%s%N) - ${starts})/(1*10^06)" | bc) milliseconds to run"
